@@ -1,0 +1,12 @@
+name: AntyLogout
+version: ${project.version}
+main: czakiss.antylogout.AntyLogout
+api-version: 1.16
+prefix: CzkAL
+authors: [ Czakiss ]
+description: This plugin add antylogout system
+commands:
+  void:
+    aliases: [al,antylogout]
+    description: This command show author of AntyLogout system
+    usage: /<command>

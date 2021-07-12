@@ -1,0 +1,28 @@
+#Time to stop antylogout system
+seconds_cooldown: 15
+#Does all entities turn off antylogout system?
+hurt_by_entity: false
+#Message on boss bar. Use [SECONDS] to show seconds lolz
+status_bar: '&cJestes w walce! Możesz wylogowac sie za &4[SECONDS] &csekund.'
+#Message on chat when player was hurt
+message_on_damage: '&4&l[AntyLogout] &eZostales zaatakowany, nie wychodz przez &c[SECONDS] &esekund'
+#Message on chat when antylogout system turn off
+message_stoped: '&4&l[AntyLogout] &aMozesz sie wylogowac!'
+#Message on chat when player was killed by antylogout and joined to server
+message_on_join: '&4&l[AntyLogout] &eWylogowales sie podczas ostatniej walki przez co &czginal&e!'
+
+message_title: '&cZostales zabity'
+message_title_subtitle: '&cPrzez &4&l[AntyLogout]'
+
+message_broadcast: '&4&l[AntyLogout] &c[PLAYER] &ewylogowal sie podczas ostatniej walki przez co &czginal&e!'
+message_blocked_command: '&4&l[AntyLogout] &cNie mozesz uzywac tej komendy podczas walki!'
+
+ticks: 20
+worlds:
+  - "world"
+  - "world_nether"
+  - "world_the_end"
+
+blocked_commands:
+  - "/msg"
+  - "/enderchest"
