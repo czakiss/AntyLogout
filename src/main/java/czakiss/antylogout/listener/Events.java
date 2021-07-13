@@ -12,7 +12,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -48,35 +50,45 @@ public class Events implements Listener {
                 DamagedPlayers.playerList.get(DamagedPlayers.playerList.indexOf(damagedPlayer))
                         .setDamagedPlayerStatus(DamagedPlayerStatus.LOGOUT);
                 p.setHealth(0);
+                DamagedBossBar.removeBossBar(p.getUniqueId());
                 Bukkit.broadcastMessage( ChatColor.translateAlternateColorCodes('&',ConfigText.MESSAGE_BROADCAST.replace("[PLAYER]",p.getName())));
                 List<Entity> nearby = p.getNearbyEntities(15, 15, 15);
                 for(Entity near : nearby) {
                     near.getWorld().playSound(p.getLocation(), Sound.ENTITY_ZOMBIE_ATTACK_IRON_DOOR, 14.0F, 1.4F);
                     BlockData fallingDustData = Material.REDSTONE_BLOCK.createBlockData();
-                    p.getWorld().spawnParticle(Particle.BLOCK_DUST, p.getLocation(), (int) Math.ceil(2*32), 0.5, 0.5, 0.5, 0.0D, fallingDustData, true);
-                    for(int i = 0; i <360; i+=10) {
-                        loc.setZ(loc.getZ() + Math.cos(i) * 3);
-                        loc.setX(loc.getX() + Math.sin(i) * 3);
-                        loc.setY(loc.getY() + Math.sin(i) * 3);
-                        near.getWorld().playEffect(loc, Effect.MOBSPAWNER_FLAMES, 1);
+                    p.getWorld().spawnParticle(Particle.BLOCK_DUST, p.getLocation(), 64, 1, 1, 1, 0.0D, fallingDustData, true);
+                    ArrayList<Vector> points = DrawParticleShere.makeSphere(0.5,0.5,0.5,1,false);
+                    for(Vector vector:points) {
+                        near.getWorld().playEffect(loc.add(vector), Effect.MOBSPAWNER_FLAMES, 1);
                     }
                 }
             }
         }
     }
 
-    @EventHandler
+
+
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDamage(EntityDamageByEntityEvent e){
+        if(e.isCancelled()){
+            return;
+        }
         if(e.getEntity() instanceof Player){
             Player p = (Player) e.getEntity();
-            if( ((e.getDamager() instanceof Player) || ConfigText.HURT_BY_ENTITY != (e.getDamager() instanceof Player)) && ConfigText.WORLDS.contains(p.getWorld().getName())){
+            if(ConfigText.WORLDS.contains(p.getWorld().getName())){
 
                 Date now = new Date();
-                if(e.getDamager() instanceof Player){
-                    Player attacker = (Player) e.getDamager();
-                    setDamage(attacker,now);
+                if(!p.hasPermission("antylogout.admin")){
+                    setDamage(p,now);
                 }
-                setDamage(p,now);
+                if((e.getDamager() instanceof Player)){
+                    Player attacker = (Player) e.getDamager();
+                    if(!attacker.hasPermission("antylogout.admin")){
+                        if(((e.getDamager() instanceof Player) || ConfigText.HURT_BY_ENTITY != (e.getDamager() instanceof Player))){
+                            setDamage(attacker,now);
+                        }
+                    }
+                }
             }
         }
     }
@@ -94,16 +106,19 @@ public class Events implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPreprocess(PlayerCommandPreprocessEvent event)
     {
-        Player player = event.getPlayer();
-        String command = event.getMessage();
-        List<String> blockedCommands = ConfigText.BLOCKED_COMMANDS;
+        Player p = event.getPlayer();
+        DamagedPlayer damagedPlayer = DamagedPlayers.getDamagedPlayerByPlayer(p.getUniqueId());
+        if(damagedPlayer != null && damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.ON_SYSTEM){
+            String command = event.getMessage();
+            List<String> blockedCommands = ConfigText.BLOCKED_COMMANDS;
 
-        for (String blockedComamnd : blockedCommands)
-        {
-            if(command.equalsIgnoreCase(blockedComamnd))
+            for (String blockedComamnd : blockedCommands)
             {
-                event.setCancelled(true);
-                event.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',ConfigText.MESSAGE_BLOCKED_COMMAND));
+                if(command.equalsIgnoreCase(blockedComamnd))
+                {
+                    event.setCancelled(true);
+                    p.sendMessage(ChatColor.translateAlternateColorCodes('&',ConfigText.MESSAGE_BLOCKED_COMMAND));
+                }
             }
         }
     }
