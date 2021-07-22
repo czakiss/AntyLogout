@@ -3,13 +3,12 @@ package czakiss.antylogout.listener;
 import czakiss.antylogout.model.*;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -22,6 +21,19 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class Events implements Listener {
+
+    @EventHandler
+    public void entityDeath(EntityDeathEvent e) {
+        if (e.getEntity() instanceof Player) {
+            Player p = (Player) e.getEntity();
+            UUID uuid = p.getUniqueId();
+            DamagedPlayer damagedPlayer = DamagedPlayers.getDamagedPlayerByPlayer(uuid);
+            if(damagedPlayer != null){
+                DamagedBossBar.removeBossBar(p.getUniqueId());
+                DamagedPlayers.removePlayer(p.getUniqueId());
+            }
+        }
+    }
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e){
@@ -80,7 +92,15 @@ public class Events implements Listener {
                 Date now = new Date();
 
                 boolean playerAttacker = (e.getDamager() instanceof Player);
-                boolean mobAttacker = (e.getDamager() instanceof Monster);
+                boolean mobAttacker = (e.getDamager() instanceof Monster) && ConfigText.HURT_BY_ENTITY;
+
+                boolean isArrow = (e.getDamager() instanceof Arrow);
+                boolean isTrident = (e.getDamager() instanceof Trident);
+                boolean isAreaEffectCloud = (e.getDamager() instanceof AreaEffectCloud );
+                boolean isThrownPotion = (e.getDamager() instanceof ThrownPotion);
+                boolean isTNTPrimed = (e.getDamager() instanceof TNTPrimed );
+
+                boolean battleEntitiesAttacker = isArrow || isTrident || isTNTPrimed || isAreaEffectCloud || isThrownPotion;
 
                 if(playerAttacker){
                     Player attacker = (Player) e.getDamager();
@@ -89,7 +109,7 @@ public class Events implements Listener {
                     }
                 }
 
-                if(!p.hasPermission("antylogout.admin") && (mobAttacker || ConfigText.HURT_BY_ENTITY) ){
+                if(!p.hasPermission("antylogout.admin") && (mobAttacker || playerAttacker || battleEntitiesAttacker)){
                     setDamage(p,now);
                 }
             }
