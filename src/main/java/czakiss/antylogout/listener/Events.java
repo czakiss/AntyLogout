@@ -76,18 +76,19 @@ public class Events implements Listener {
         if(e.getEntity() instanceof Player){
             Player p = (Player) e.getEntity();
             if(ConfigText.WORLDS.contains(p.getWorld().getName())){
-
                 Date now = new Date();
-                if(!p.hasPermission("antylogout.admin")){
-                    setDamage(p,now);
-                }
-                if((e.getDamager() instanceof Player)){
+
+                boolean playerAttack = (e.getDamager() instanceof Player);
+
+                if(playerAttack){
                     Player attacker = (Player) e.getDamager();
-                    if(!attacker.hasPermission("antylogout.admin")){
-                        if(((e.getDamager() instanceof Player) || ConfigText.HURT_BY_ENTITY != (e.getDamager() instanceof Player))){
-                            setDamage(attacker,now);
-                        }
+                    if(!attacker.hasPermission("antylogout.admin")) {
+                        setDamage(attacker,now);
                     }
+                }
+
+                if(!p.hasPermission("antylogout.admin") && (playerAttack || ConfigText.HURT_BY_ENTITY) ){
+                    setDamage(p,now);
                 }
             }
         }

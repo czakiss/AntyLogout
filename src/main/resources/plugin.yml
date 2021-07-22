@@ -6,7 +6,7 @@ prefix: CzkAL
 authors: [ Czakiss ]
 description: This plugin add antylogout system
 commands:
-  void:
+  antylogout:
     aliases: [al,antylogout]
     description: This command show author of AntyLogout system
     usage: /<command>
