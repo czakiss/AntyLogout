@@ -4,6 +4,7 @@ import czakiss.antylogout.model.*;
 import org.bukkit.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -78,16 +79,17 @@ public class Events implements Listener {
             if(ConfigText.WORLDS.contains(p.getWorld().getName())){
                 Date now = new Date();
 
-                boolean playerAttack = (e.getDamager() instanceof Player);
+                boolean playerAttacker = (e.getDamager() instanceof Player);
+                boolean mobAttacker = (e.getDamager() instanceof Monster);
 
-                if(playerAttack){
+                if(playerAttacker){
                     Player attacker = (Player) e.getDamager();
                     if(!attacker.hasPermission("antylogout.admin")) {
                         setDamage(attacker,now);
                     }
                 }
 
-                if(!p.hasPermission("antylogout.admin") && (playerAttack || ConfigText.HURT_BY_ENTITY) ){
+                if(!p.hasPermission("antylogout.admin") && (mobAttacker || ConfigText.HURT_BY_ENTITY) ){
                     setDamage(p,now);
                 }
             }

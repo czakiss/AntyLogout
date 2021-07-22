@@ -19,6 +19,26 @@ public class Timer {
         new BukkitRunnable() {
             @Override
             public void run() {
+                List<DamagedPlayer> damagedPlayers = new ArrayList<>(DamagedPlayers.playerList);
+                for (DamagedPlayer damagedPlayer : damagedPlayers) {
+                    if (damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.ON_SYSTEM) {
+
+                        long timeDifference = TimeUnit.MILLISECONDS.toSeconds(
+                                new Date().getTime() - damagedPlayer.getDate().getTime()
+                        );
+                        long cooldown = ConfigText.SECONDS_COOLDOWN - timeDifference;
+
+                        BossBar bossBar = damagedPlayer.getBossBar();
+                        if (cooldown >= 0) {
+                            bossBar.setTitle(DamagedBossBar.getTitle(cooldown));
+                            bossBar.setProgress(cooldown / (double) ConfigText.SECONDS_COOLDOWN);
+                            bossBar.setColor(DamagedBossBar.getRandomBarColor());
+                        } else {
+                            DamagedBossBar.removeBossBar(damagedPlayer.getUuid());
+                            DamagedPlayers.playerList.remove(damagedPlayer);
+                        }
+                    }
+                }
             }
         }.runTaskTimerAsynchronously(plugin, ConfigText.TICKS, ConfigText.TICKS);
     }
