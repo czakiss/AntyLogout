@@ -2,6 +2,7 @@ package czakiss.antylogout.listener;
 
 import czakiss.antylogout.model.*;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,7 +22,8 @@ public class Timer {
             public void run() {
                 List<DamagedPlayer> damagedPlayers = new ArrayList<>(DamagedPlayers.playerList);
                 for (DamagedPlayer damagedPlayer : damagedPlayers) {
-                    if (damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.ON_SYSTEM) {
+                    if (damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.ON_SYSTEM ||
+                            damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.DONE) {
 
                         long timeDifference = TimeUnit.MILLISECONDS.toSeconds(
                                 new Date().getTime() - damagedPlayer.getDate().getTime()
@@ -29,11 +31,16 @@ public class Timer {
                         long cooldown = ConfigText.SECONDS_COOLDOWN - timeDifference;
 
                         BossBar bossBar = damagedPlayer.getBossBar();
-                        if (cooldown >= 0) {
+                        if (cooldown > 0) {
                             bossBar.setTitle(DamagedBossBar.getTitle(cooldown));
                             bossBar.setProgress(cooldown / (double) ConfigText.SECONDS_COOLDOWN);
-                            bossBar.setColor(DamagedBossBar.getRandomBarColor());
-                        } else {
+                            bossBar.setColor(BarColor.RED);
+                        } else if(cooldown == 0) {
+                            bossBar.setTitle(ChatColor.translateAlternateColorCodes('&',ConfigText.STATUS_BAR_DONE));
+                            bossBar.setProgress(1);
+                            bossBar.setColor(BarColor.GREEN);
+                            damagedPlayer.setDamagedPlayerStatus(DamagedPlayerStatus.DONE);
+                        } else if (cooldown < -3 && damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.DONE){
                             DamagedBossBar.removeBossBar(damagedPlayer.getUuid());
                             DamagedPlayers.playerList.remove(damagedPlayer);
                         }

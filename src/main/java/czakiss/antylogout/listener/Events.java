@@ -30,7 +30,6 @@ public class Events implements Listener {
             DamagedPlayer damagedPlayer = DamagedPlayers.getDamagedPlayerByPlayer(uuid);
             if(damagedPlayer != null){
                 DamagedBossBar.removeBossBar(p.getUniqueId());
-                DamagedPlayers.removePlayer(p.getUniqueId());
             }
         }
     }
@@ -102,14 +101,26 @@ public class Events implements Listener {
 
                 boolean battleEntitiesAttacker = isArrow || isTrident || isTNTPrimed || isAreaEffectCloud || isThrownPotion;
 
-                if(playerAttacker){
-                    Player attacker = (Player) e.getDamager();
-                    if(!attacker.hasPermission("antylogout.admin")) {
-                        setDamage(attacker,now);
+                Player attacker = null;
+                if(playerAttacker) {
+                    attacker = (Player) e.getDamager();
+                } else if (isArrow){
+                    Arrow a = (Arrow) e.getDamager();
+                    if (a.getShooter() instanceof Player){
+                        attacker = (Player) a.getShooter();
+                    }
+                } else if (isTrident){
+                    Trident t = (Trident) e.getDamager();
+                    if (t.getShooter() instanceof Player){
+                        attacker = (Player) t.getShooter();
                     }
                 }
 
-                if(!p.hasPermission("antylogout.admin") && (mobAttacker || playerAttacker || battleEntitiesAttacker)){
+                if(attacker != null && !attacker.hasPermission("antylogout.admin")){
+                    setDamage(attacker,now);
+                }
+
+                if(!p.hasPermission("antylogout.admin") && (mobAttacker || playerAttacker || attacker != null)){
                     setDamage(p,now);
                 }
             }

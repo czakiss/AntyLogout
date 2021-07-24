@@ -18,8 +18,11 @@ public class DamagedBossBar {
 
     private static final BarColor[] barColors = {BarColor.BLUE,BarColor.GREEN,BarColor.PINK,BarColor.PURPLE,BarColor.RED,BarColor.YELLOW};
 
+//    public static BarColor getRandomBarColor(){
+//        return barColors[rand.nextInt(barColors.length)];
+//    }
     public static BarColor getRandomBarColor(){
-        return barColors[rand.nextInt(barColors.length)];
+        return BarColor.RED;
     }
 
 

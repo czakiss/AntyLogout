@@ -4,6 +4,8 @@ seconds_cooldown: 15
 hurt_by_entity: false
 #Message on boss bar. Use [SECONDS] to show seconds lolz
 status_bar: '&cJestes w walce! Możesz wylogowac sie za &4[SECONDS] &csekund.'
+#Message on boss bar. Use [SECONDS] to show seconds lolz
+status_bar_done: '&aMożesz sie wylogowac'
 #Message on chat when player was hurt
 message_on_damage: '&4&l[AntyLogout] &eZostales zaatakowany, nie wychodz przez &c[SECONDS] &esekund'
 #Message on chat when antylogout system turn off
