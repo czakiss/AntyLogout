@@ -20,7 +20,7 @@ public class ConfigText {
     public static String MESSAGE_TITLE_SUB;
     public static String MESSAGE_BROADCAST;
     public static List<String> WORLDS;
-    public static List<String> BLOCKED_COMMANDS;
+    public static List<String> ALLOWED_COMMANDS;
     public static String MESSAGE_BLOCKED_COMMAND;
     private static Plugin plugin;
     private static FileConfiguration config;
@@ -46,11 +46,11 @@ public class ConfigText {
         MESSAGE_BLOCKED_COMMAND = config.getString("message_blocked_command","&4&l[AntyLogout] &cNie mozesz uzywac tej komendy podczas walki!");
         TICKS = config.getInt("ticks",20);
         WORLDS = config.getStringList("worlds");
-        BLOCKED_COMMANDS = config.getStringList("blocked_commands");
+        ALLOWED_COMMANDS = config.getStringList("allowed_commands");
         if(WORLDS.isEmpty()){
             WORLDS = Arrays.asList("world","world_nether","world_the_end");
         }
-        if(BLOCKED_COMMANDS.isEmpty()){
+        if(ALLOWED_COMMANDS.isEmpty()){
             WORLDS = Arrays.asList("/msg","/r","/enderchest");
         }
     }

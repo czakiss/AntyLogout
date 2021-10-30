@@ -12,6 +12,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -28,8 +29,9 @@ public class Events implements Listener {
             Player p = (Player) e.getEntity();
             UUID uuid = p.getUniqueId();
             DamagedPlayer damagedPlayer = DamagedPlayers.getDamagedPlayerByPlayer(uuid);
-            if(damagedPlayer != null){
-                DamagedBossBar.removeBossBar(p.getUniqueId());
+            DamagedBossBar.removeBossBar(p.getUniqueId());
+            if(damagedPlayer != null && damagedPlayer.getDamagedPlayerStatus() != DamagedPlayerStatus.LOGOUT){
+                DamagedPlayers.removePlayer(p.getUniqueId());
             }
         }
     }
@@ -79,6 +81,19 @@ public class Events implements Listener {
     }
 
 
+    @EventHandler
+    public void onFly(PlayerToggleFlightEvent e){
+            Player p = (Player) e.getPlayer();
+            if(!p.isFlying()){
+                UUID uuid = p.getUniqueId();
+                DamagedPlayer damagedPlayer = DamagedPlayers.getDamagedPlayerByPlayer(uuid);
+                if(damagedPlayer != null && damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.ON_SYSTEM){
+                    p.setAllowFlight(false);
+                    p.setFlying(false);
+                }
+            }
+    }
+
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDamage(EntityDamageByEntityEvent e){
@@ -98,8 +113,6 @@ public class Events implements Listener {
                 boolean isAreaEffectCloud = (e.getDamager() instanceof AreaEffectCloud );
                 boolean isThrownPotion = (e.getDamager() instanceof ThrownPotion);
                 boolean isTNTPrimed = (e.getDamager() instanceof TNTPrimed );
-
-                boolean battleEntitiesAttacker = isArrow || isTrident || isTNTPrimed || isAreaEffectCloud || isThrownPotion;
 
                 Player attacker = null;
                 if(playerAttacker) {
@@ -122,6 +135,8 @@ public class Events implements Listener {
 
                 if(!p.hasPermission("antylogout.admin") && (mobAttacker || playerAttacker || attacker != null)){
                     setDamage(p,now);
+                    p.setAllowFlight(false);
+                    p.setFlying(false);
                 }
             }
         }
@@ -144,15 +159,20 @@ public class Events implements Listener {
         DamagedPlayer damagedPlayer = DamagedPlayers.getDamagedPlayerByPlayer(p.getUniqueId());
         if(damagedPlayer != null && damagedPlayer.getDamagedPlayerStatus() == DamagedPlayerStatus.ON_SYSTEM){
             String command = event.getMessage();
-            List<String> blockedCommands = ConfigText.BLOCKED_COMMANDS;
+            List<String> allowedCommands = ConfigText.ALLOWED_COMMANDS;
 
-            for (String blockedComamnd : blockedCommands)
+            boolean empty = true;
+            for (String allowedCommand : allowedCommands)
             {
-                if(command.equalsIgnoreCase(blockedComamnd))
+                if(command.split(" ")[0].equalsIgnoreCase(allowedCommand))
                 {
-                    event.setCancelled(true);
-                    p.sendMessage(ChatColor.translateAlternateColorCodes('&',ConfigText.MESSAGE_BLOCKED_COMMAND));
+                    empty = false;
+
                 }
+            }
+            if(empty){
+                event.setCancelled(true);
+                p.sendMessage(ChatColor.translateAlternateColorCodes('&',ConfigText.MESSAGE_BLOCKED_COMMAND));
             }
         }
     }

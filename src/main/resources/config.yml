@@ -28,6 +28,6 @@ worlds:
   - "world_nether"
   - "world_the_end"
 #List of command which should be blocked
-blocked_commands:
+allowed_commands:
   - "/msg"
   - "/enderchest"
